@@ -1,0 +1,1 @@
+Entre las dificultades me ví en el problema de implementar todo como microservicios, sin embargo pude ejecutar los test correctamente

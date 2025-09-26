@@ -1,13 +1,12 @@
-# Dockerfile para portal-paciente-service
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copiar package.json y package-lock.json
+# Copiar package files
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm ci --only=production
+# Instalar todas las dependencias (incluyendo devDependencies para build)
+RUN npm ci
 
 # Copiar código fuente
 COPY . .
@@ -15,13 +14,11 @@ COPY . .
 # Compilar TypeScript
 RUN npm run build
 
+# Limpiar devDependencies después del build
+RUN npm prune --production
+
 # Exponer puerto
 EXPOSE 3002
 
-# Variables de entorno por defecto
-ENV NODE_ENV=production
-ENV PORT=3002
-ENV LICENSES_SERVICE_URL=http://licencias:3001
-
-# Comando de inicio
+# Comando para ejecutar
 CMD ["npm", "start"]

@@ -8,19 +8,23 @@
     "test": "jest",
     "test:pact": "jest --testPathPattern=pact",
     "test:medico": "jest --testNamePattern=\"Medico App\"",
-    "test:portal": "jest --testNamePattern=\"Portal Paciente\"", 
+    "test:portal": "jest --testNamePattern=\"Portal Paciente\"",
     "test:validador": "jest --testNamePattern=\"Validador Aseguradora\"",
     "verify:provider": "node verify-provider.js"
   },
-  "keywords": ["pact", "contract-testing", "microservices"],
+  "keywords": [
+    "pact",
+    "contract-testing",
+    "microservices"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@pact-foundation/pact": "^12.4.2",
-    "axios": "^1.7.7",
-    "@pact-foundation/pact-node": "^10.17.7"
+    "@pact-foundation/pact-node": "^10.17.7",
+    "axios": "^1.7.7"
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^15.0.1",
     "@types/jest": "^29.5.13",
     "@types/node": "^24.5.2",
     "jest": "^29.7.0",
@@ -30,16 +34,23 @@
   "jest": {
     "preset": "ts-jest/presets/default-esm",
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "testMatch": [
       "**/__tests__/**/*.test.ts",
       "**/?(*.)+(spec|test).ts"
     ],
-    "extensionsToTreatAsEsm": [".ts"],
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
     "transform": {
-      "^.+\\.ts$": ["ts-jest", {
-        "useESM": true
-      }]
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "useESM": true
+        }
+      ]
     },
     "moduleNameMapping": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
