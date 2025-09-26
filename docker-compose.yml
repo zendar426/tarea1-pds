@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  # Base de datos MongoDB
+  mongodb:
+    image: mongo:7-jammy
+    container_name: licencias-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: licencias
+    volumes:
+      - mongodb_data:/data/db
+      - ./database/seed:/docker-entrypoint-initdb.d
+    ports:
+      - "27017:27017"
+    networks:
+      - licencias-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Servicio de Licencias (Proveedor)
+  licencias:
+    build:
+      context: ./licencias-service
+      dockerfile: Dockerfile
+    container_name: licencias-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      MONGODB_URI: mongodb://mongodb:27017/licencias
+    ports:
+      - "3001:3001"
+    networks:
+      - licencias-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Portal Paciente Service (Consumidor)
+  portal-paciente:
+    build:
+      context: ./portal-paciente-service
+      dockerfile: Dockerfile
+    container_name: portal-paciente-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      LICENSES_SERVICE_URL: http://licencias:3001
+    ports:
+      - "3002:3002"
+    networks:
+      - licencias-network
+    depends_on:
+      licencias:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Validador Aseguradora Service (Consumidor)
+  validador-aseguradora:
+    build:
+      context: ./validador-aseguradora-service
+      dockerfile: Dockerfile
+    container_name: validador-aseguradora-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      LICENSES_SERVICE_URL: http://licencias:3001
+    ports:
+      - "3003:3003"
+    networks:
+      - licencias-network
+    depends_on:
+      licencias:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Consumer Tests (Para generar contratos Pact)
+  consumer-tests:
+    build:
+      context: ./consumer-test
+      dockerfile: Dockerfile
+    container_name: consumer-tests
+    environment:
+      NODE_ENV: test
+      LICENSES_SERVICE_URL: http://licencias:3001
+    volumes:
+      - ./pacts:/app/pacts
+    networks:
+      - licencias-network
+    depends_on:
+      licencias:
+        condition: service_healthy
+    profiles:
+      - testing
+
+  # Verificador de Proveedor (Para verificar contratos Pact)
+  verify-licencias:
+    build:
+      context: ./consumer-test
+      dockerfile: Dockerfile
+    container_name: verify-licencias
+    environment:
+      NODE_ENV: test
+      LICENSES_SERVICE_URL: http://licencias:3001
+      PACT_PROVIDER_URL: http://licencias:3001
+      PACT_PROVIDER_NAME: "Licencias Service"
+    volumes:
+      - ./pacts:/app/pacts
+    networks:
+      - licencias-network
+    depends_on:
+      licencias:
+        condition: service_healthy
+    profiles:
+      - verification
+    command: ["npm", "run", "verify:provider"]
+
+networks:
+  licencias-network:
+    driver: bridge
+    name: licencias-network
+
+volumes:
+  mongodb_data:
+    name: licencias-mongodb-data

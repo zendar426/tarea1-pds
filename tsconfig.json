@@ -1,12 +1,28 @@
+// ./tsconfig.json (el de la raíz)
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "outDir": "dist"
+    /* --- Opciones Básicas --- */
+    "target": "ES2020",                // Compila a una versión moderna de JS compatible con Node.js
+    "module": "commonjs",               // Usa el sistema de módulos estándar de Node.js
+    "esModuleInterop": true,            // Permite una mejor interoperabilidad entre módulos CommonJS y ES
+    "forceConsistentCasingInFileNames": true, // Evita problemas de mayúsculas/minúsculas en los nombres de archivo
+
+    /* --- Chequeo de Tipos Estricto --- */
+    "strict": true,                     // Habilita todas las opciones de chequeo de tipos estrictas
+    "skipLibCheck": true,               // Omite la verificación de tipos de los archivos de declaración (.d.ts) de las librerías
+
+    /* --- Configuración para Jest y Tests --- */
+    "resolveJsonModule": true           // Permite importar archivos .json directamente en los tests si lo necesitas
   },
-  "include": ["src"]
+  // Le dice a TypeScript qué archivos incluir en este "proyecto"
+  "include": [
+    "pact-tests/**/*.ts" // Incluye solo los archivos TypeScript dentro de tu carpeta de tests
+  ],
+  // Le dice a TypeScript qué carpetas ignorar completamente
+  "exclude": [
+    "node_modules",
+    "licencias-service",
+    "portal-paciente-service",
+    "validador-aseguradora-service"
+  ]
 }
