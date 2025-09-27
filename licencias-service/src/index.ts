@@ -36,8 +36,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
+// 404 handler (must be last) - Express 5 no longer supports '*' path; use a final middleware
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     error: 'Not Found',
